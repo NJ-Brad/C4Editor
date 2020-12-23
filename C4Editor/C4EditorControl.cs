@@ -17,17 +17,17 @@ namespace C4Editor
         {
             InitializeComponent();
 
-            newToolStripButton.DropDownItems.Clear();
-            newToolStripButton.DropDownItems.Add("Context", null, (s, e) => { NewDocument("Context"); } );
-            newToolStripButton.DropDownItems.Add("Container", null, (s, e) => { NewDocument("Container"); });
-            newToolStripButton.DropDownItems.Add("Deployment", null, (s, e) => { NewDocument("Deployment"); });
-            newToolStripButton.DropDownItems.Add("Component", null, (s, e) => { NewDocument("Component"); });
+            //newToolStripButton.DropDownItems.Clear();
+            //newToolStripButton.DropDownItems.Add("Context", null, (s, e) => { NewDocument("Context"); } );
+            //newToolStripButton.DropDownItems.Add("Container", null, (s, e) => { NewDocument("Container"); });
+            //newToolStripButton.DropDownItems.Add("Deployment", null, (s, e) => { NewDocument("Deployment"); });
+            //newToolStripButton.DropDownItems.Add("Component", null, (s, e) => { NewDocument("Component"); });
 
-            //newToolStripButton.Click += (s, e) => { NewDocument(); };
-            openToolStripButton.Click += (s, e) => { OpenDocument(); };
-            saveToolStripButton.Click += (s, e) => { SaveDocument(); };
+            ////newToolStripButton.Click += (s, e) => { NewDocument(); };
+            //openToolStripButton.Click += (s, e) => { OpenDocument(); };
+            //saveToolStripButton.Click += (s, e) => { SaveDocument(); };
 
-            toolStripButton1.Click += (s, e) => { RefreshDisplay(); };
+            refreshButton.Click += (s, e) => { RefreshDisplay(); };
             toolStripButton2.Click += (s, e) => { StartOver(); };
 
             cutToolStripButton.Click += (s, e) => { Cut(); };
@@ -37,12 +37,14 @@ namespace C4Editor
             moveUpButton.Click += (s, e) => { MoveUp(); };
             moveDownButton.Click += (s, e) => { MoveDown(); };
 
+            propertiesButton.Click += (s, e) => { Properties(); };
+
             autoSaveTimer = new Timer();
             autoSaveTimer.Tick += AutoSaveTimer_Tick;
             autoSaveTimer.Interval = 3000;
             autoSaveTimer.Enabled = false;
         }
-        
+
         private void NewDocument(string documentType)
         {
             if (dirty)
@@ -58,8 +60,8 @@ namespace C4Editor
 
             DocToTree(treeView1);
 
-            propertyTable1.SetText("No object selected");
-            propertyTable1.ClearProperties();
+            //propertyTable1.SetText("No object selected");
+            //propertyTable1.ClearProperties();
 
             zoomPanImageBox1.Image = null;
             textBox1.Text = string.Empty;
@@ -79,8 +81,8 @@ namespace C4Editor
 
                 DocToTree(treeView1);
 
-                propertyTable1.SetText("No object selected");
-                propertyTable1.ClearProperties();
+                //propertyTable1.SetText("No object selected");
+                //propertyTable1.ClearProperties();
 
                 RenderDocument(docText);
 
@@ -91,6 +93,24 @@ namespace C4Editor
             }
 
         }
+        public void LoadFile(string fileName)
+        {
+            string docText = File.ReadAllText(fileName);
+            doc = DocumentParser.Parse(docText);
+
+            DocToTree(treeView1);
+
+            //propertyTable1.SetText("No object selected");
+            //propertyTable1.ClearProperties();
+
+            RenderDocument(docText);
+
+            textBox1.Text = docText;
+
+            Text = $"C4 Editor - {Path.GetFileName(fileName)}";
+            this.fileName = fileName;
+        }
+
 
         string fileName = "";
 
@@ -181,13 +201,58 @@ namespace C4Editor
 
                 TreeNode newNode = new TreeNode(clipboardNode.Text);
                 newNode.Tag = clipboardNode.Tag;
-                treeView1.SelectedNode.Parent.Nodes.Insert((nodeIndex -1), newNode);
+                treeView1.SelectedNode.Parent.Nodes.Insert((nodeIndex - 1), newNode);
 
                 IterateTreeNodes(clipboardNode, newNode);
 
                 treeView1.SelectedNode = newNode;
             }
             DocumentChanged();
+        }
+
+        private void Properties()
+        {
+            if (treeView1.SelectedNode != null)
+            {
+                //int nodeIndex = GetIndex(treeView1.SelectedNode);
+
+                //// it has to be found
+                //if (nodeIndex != -1)
+                {
+                    object obj = treeView1.SelectedNode.Tag;
+                    if (obj != null)
+                    {
+                        PropertyEditor.PropertyForm pf = new PropertyEditor.PropertyForm();
+
+                        // build the map
+                        BuildAliasMap(treeView1.Nodes[1]);
+                        // store it, for use by the dialog
+                        pf.RuntimeChoices.Add("Items", itemAliases);
+
+                        pf.ShowDialog(obj);
+                        if (obj is Document)
+                        {
+                        }
+                        else
+                        {
+                            if (obj is C4Editor.C4Types.C4Relation)
+                            {
+                                //treeView1.SelectedNode.Text = $"{itemAliases[(obj as Item).GetValue(0)]} --> {itemAliases[(obj as Item).GetValue(1)]}";
+
+                                string startNode = itemAliases.ContainsKey((obj as Item).GetValue(0)) ? itemAliases[(obj as Item).GetValue(0)] : (obj as Item).GetValue(0);
+                                string endNode = itemAliases.ContainsKey((obj as Item).GetValue(1)) ? itemAliases[(obj as Item).GetValue(1)] : (obj as Item).GetValue(1);
+                                treeView1.SelectedNode.Text = $"{startNode} --> {endNode}";
+
+                            }
+                            else
+                            {
+                                treeView1.SelectedNode.Text = (obj as Item).GetValue(1);
+                            }
+                        }
+                    }
+                }
+                DocumentChanged();
+            }
         }
 
         private void MoveDown()
@@ -254,7 +319,7 @@ namespace C4Editor
 
         private void RefreshDisplay()
         {
-            SaveItemData();
+//            SaveItemData();
 
             BuildDocument();
 
@@ -282,7 +347,7 @@ namespace C4Editor
                 {
                     rtnVal = true;
                 }
-                else if (parentAllowed &&  (node.Parent != null))
+                else if (parentAllowed && (node.Parent != null))
                 {
                     rtnVal = IsNodeInCorrectSection(node.Parent, sectionNode);
                 }
@@ -388,7 +453,7 @@ namespace C4Editor
                     case "Deployment":
                     case "Container":
                     case "Component":
-                        item.DropDownItems.Add("Relationship", null, (s, e) => { AddItem("Relationship"); });
+                        item.DropDownItems.Add("Relationship", null, (s, e) => { AddItem("Rel"); });
                         break;
                     case "Dynamic":     // saving this for later
                         break;
@@ -410,12 +475,16 @@ namespace C4Editor
                 item.Parameters.Add(GetNewName(itemType));
                 item.Parameters.Add($"New {DisplayNames.GetDisplayName(itemType)}");
 
+                item = ItemParser.ConvertToType(item);
+
                 TreeNode treeNode = new TreeNode();
                 treeNode.Text = item.GetValue(1);
                 treeNode.Tag = item;
                 previousNode.Nodes.Add(treeNode);
 
                 treeView1.SelectedNode = treeNode;
+
+                Properties();
             }
         }
 
@@ -458,7 +527,14 @@ namespace C4Editor
             tsmi = new ToolStripMenuItem { Name = "contextMenuAdd", Text = "Add" };
             treeView1.ContextMenuStrip.Items.Add(tsmi);
 
-            propertyTable1.ProcessChange = (c) => { DocumentChanged(); };
+            tss = new ToolStripSeparator();
+            treeView1.ContextMenuStrip.Items.Add(tss);
+
+            tsmi = new ToolStripMenuItem { Name = "contextMenuProperties", Text = "Properties" };
+            tsmi.Click += (s, e) => { Properties(); };
+            treeView1.ContextMenuStrip.Items.Add(tsmi);
+
+            //propertyTable1.ProcessChange = (c) => { DocumentChanged(); };
 
             //NewDocument();
         }
@@ -507,10 +583,17 @@ namespace C4Editor
                 SetAtLevel(command.Level, treeNode);
             }
 
+            BuildAliasMap(treeView1.Nodes[1]);
+
             foreach (Item relation in doc.Relations)
             {
                 TreeNode treeNode = new TreeNode();
-                treeNode.Text = $"{relation.Parameters[0]} --> {relation.Parameters[1]}";
+                //treeNode.Text = $"{relation.Parameters[0]} --> {relation.Parameters[1]}";
+
+                string startNode = itemAliases.ContainsKey(relation.Parameters[0]) ? itemAliases[relation.Parameters[0]] : relation.Parameters[0];
+                string endNode = itemAliases.ContainsKey(relation.Parameters[1]) ? itemAliases[relation.Parameters[1]] : relation.Parameters[1];
+                treeNode.Text = $"{startNode} --> {endNode}";
+
                 treeNode.Tag = relation;
                 relationsNode.Nodes.Add(treeNode);
             }
@@ -528,74 +611,74 @@ namespace C4Editor
             }
         }
 
-        private void SetProperties(string setName, bool includeExternal = false, bool includeDatabase = false)
-        {
-            propertyTable1.SetText("No object selected");
-            propertyTable1.ClearProperties();
+        //private void SetProperties(string setName, bool includeExternal = false, bool includeDatabase = false)
+        //{
+        //    propertyTable1.SetText("No object selected");
+        //    propertyTable1.ClearProperties();
 
-            if (includeExternal)
-            {
-                propertyTable1.AddProperty("IsExternal", "External", "Flag");
-            }
+        //    if (includeExternal)
+        //    {
+        //        propertyTable1.AddProperty("IsExternal", "External", "Flag");
+        //    }
 
-            if (includeDatabase)
-            {
-                propertyTable1.AddProperty("IsDatabase", "Database", "Flag");
-            }
+        //    if (includeDatabase)
+        //    {
+        //        propertyTable1.AddProperty("IsDatabase", "Database", "Flag");
+        //    }
 
-            switch (setName)
-            {
-                case "AL":
-                    //Alias *, label *
-                    propertyTable1.AddProperty("Alias", "Alias*", "Text");
-                    propertyTable1.AddProperty("Label", "Label*", "Text");
-                    break;
-                case "ALType":
-                    //Alias *, label *, type
-                    propertyTable1.AddProperty("Alias", "Alias*", "Text");
-                    propertyTable1.AddProperty("Label", "Label*", "Text");
-                    propertyTable1.AddProperty("Type", "Type", "Text");
-                    break;
-                case "ALD":
-                    //Alias *, label *, description
-                    propertyTable1.AddProperty("Alias", "Alias*", "Text");
-                    propertyTable1.AddProperty("Label", "Label*", "Text");
-                    propertyTable1.AddProperty("Description", "Description", "MultiLineText");
-                    break;
-                case "ALTechD":
-                    //Alias *, label *, technology *, description
-                    propertyTable1.AddProperty("Alias", "Alias*", "Text");
-                    propertyTable1.AddProperty("Label", "Label*", "Text");
-                    propertyTable1.AddProperty("Technology", "Technology*", "MultiLineText");
-                    propertyTable1.AddProperty("Description", "Description", "MultiLineText");
-                    break;
-                case "ALTech":
-                    //Alias *, label *, technology *
-                    propertyTable1.AddProperty("Alias", "Alias*", "Text");
-                    propertyTable1.AddProperty("Label", "Label*", "Text");
-                    propertyTable1.AddProperty("Technology", "Technology*", "MultiLineText");
-                    break;
-                case "FTLTech":
-                    //From *, to *, label, technology
-                    //propertyTable1.AddProperty("From", "From*", "Text");
-                    //propertyTable1.AddProperty("To", "To*", "Text");
+        //    switch (setName)
+        //    {
+        //        case "AL":
+        //            //Alias *, label *
+        //            propertyTable1.AddProperty("Alias", "Alias*", "Text");
+        //            propertyTable1.AddProperty("Label", "Label*", "Text");
+        //            break;
+        //        case "ALType":
+        //            //Alias *, label *, type
+        //            propertyTable1.AddProperty("Alias", "Alias*", "Text");
+        //            propertyTable1.AddProperty("Label", "Label*", "Text");
+        //            propertyTable1.AddProperty("Type", "Type", "Text");
+        //            break;
+        //        case "ALD":
+        //            //Alias *, label *, description
+        //            propertyTable1.AddProperty("Alias", "Alias*", "Text");
+        //            propertyTable1.AddProperty("Label", "Label*", "Text");
+        //            propertyTable1.AddProperty("Description", "Description", "MultiLineText");
+        //            break;
+        //        case "ALTechD":
+        //            //Alias *, label *, technology *, description
+        //            propertyTable1.AddProperty("Alias", "Alias*", "Text");
+        //            propertyTable1.AddProperty("Label", "Label*", "Text");
+        //            propertyTable1.AddProperty("Technology", "Technology*", "MultiLineText");
+        //            propertyTable1.AddProperty("Description", "Description", "MultiLineText");
+        //            break;
+        //        case "ALTech":
+        //            //Alias *, label *, technology *
+        //            propertyTable1.AddProperty("Alias", "Alias*", "Text");
+        //            propertyTable1.AddProperty("Label", "Label*", "Text");
+        //            propertyTable1.AddProperty("Technology", "Technology*", "MultiLineText");
+        //            break;
+        //        case "FTLTech":
+        //            //From *, to *, label, technology
+        //            //propertyTable1.AddProperty("From", "From*", "Text");
+        //            //propertyTable1.AddProperty("To", "To*", "Text");
 
-                    BuildAliasMap(treeView1.Nodes[1]);
-                    propertyTable1.AddProperty("From", "From*", "Choice", itemAliases);
-                    propertyTable1.AddProperty("To", "To*", "Choice", itemAliases);
-                    propertyTable1.AddProperty("Label", "Label", "Text");
-                    propertyTable1.AddProperty("Technology", "Technology*", "MultiLineText");
-                    break;
-                case "Document":
-                    propertyTable1.AddProperty("DocumentName", "Document Name*", "Text");
-                    propertyTable1.AddProperty("DocumentType", "Document Type*", "Choice", "Context", "Container", "Component", "Dynamic (not yet)", "Deployment");
-                    propertyTable1.AddProperty("Title", "Title", "Text");
-                    propertyTable1.AddProperty("Sketch", "Show as sketch", "Flag");
-                    propertyTable1.AddProperty("ShowLegend", "Show legend", "Flag");
-                    propertyTable1.AddProperty("TopDown", "Lay out Top-Down", "Flag");
-                    break;
-            }
-        }
+        //            BuildAliasMap(treeView1.Nodes[1]);
+        //            propertyTable1.AddProperty("From", "From*", "Choice", itemAliases);
+        //            propertyTable1.AddProperty("To", "To*", "Choice", itemAliases);
+        //            propertyTable1.AddProperty("Label", "Label", "Text");
+        //            propertyTable1.AddProperty("Technology", "Technology*", "MultiLineText");
+        //            break;
+        //        case "Document":
+        //            propertyTable1.AddProperty("DocumentName", "Document Name*", "Text");
+        //            propertyTable1.AddProperty("DocumentType", "Document Type*", "Choice", "Context", "Container", "Component", "Dynamic (not yet)", "Deployment");
+        //            propertyTable1.AddProperty("Title", "Title", "Text");
+        //            propertyTable1.AddProperty("Sketch", "Show as sketch", "Flag");
+        //            propertyTable1.AddProperty("ShowLegend", "Show legend", "Flag");
+        //            propertyTable1.AddProperty("TopDown", "Lay out Top-Down", "Flag");
+        //            break;
+        //    }
+        //}
 
         private void BuildDocument()
         {
@@ -610,10 +693,10 @@ namespace C4Editor
 
         private void BuildDocumentModel(TreeNodeCollection nodes)
         {
-            foreach (TreeNode node in nodes) 
+            foreach (TreeNode node in nodes)
             {
                 Item item = node.Tag as Item;
-                if (item != null) 
+                if (item != null)
                 {
                     item.Level = node.Level - 1;
                     doc.Commands.Add(item);
@@ -696,10 +779,11 @@ namespace C4Editor
 
         private void treeView1_BeforeSelect(object sender, TreeViewCancelEventArgs e)
         {
-            SaveItemData();
+            //            throw new Exception("move this to the property edit method");
+//            SaveItemData();
 
-            propertyTable1.SetText("No object selected");
-            propertyTable1.ClearProperties();
+            //propertyTable1.SetText("No object selected");
+            //propertyTable1.ClearProperties();
         }
 
         bool dirty = false;
@@ -708,6 +792,9 @@ namespace C4Editor
 
         private void AutoSaveTimer_Tick(object sender, EventArgs e)
         {
+            // there is a problem and I don't want to be corrupting the original
+            //return;
+
             autoSaveTimer.Stop();
             autoSaveTimer.Enabled = false;
 
@@ -732,98 +819,98 @@ namespace C4Editor
             autoSaveTimer.Start();
         }
 
-        private void SaveItemData()
-        {
-            if (previousNode != null)
-            {
-                Document doc = (previousNode.Tag as Document);
-                if (doc != null)
-                {
-                    doc.DocumentName = propertyTable1.GetValue("DocumentName");
-                    doc.DocumentType = propertyTable1.GetValue("DocumentType");
-                    doc.Title = propertyTable1.GetValue("Title");
-                    doc.Sketch = propertyTable1.GetValue("Sketch") == "Y";
-                    doc.ShowLegend = propertyTable1.GetValue("ShowLegend") == "Y";
-                    doc.TopDown = propertyTable1.GetValue("TopDown") == "Y";
-                }
+        //private void SaveItemData()
+        //{
+        //    if (previousNode != null)
+        //    {
+        //        //Document doc = (previousNode.Tag as Document);
+        //        //if (doc != null)
+        //        //{
+        //        //    doc.DocumentName = propertyTable1.GetValue("DocumentName");
+        //        //    doc.DocumentType = propertyTable1.GetValue("DocumentType");
+        //        //    doc.Title = propertyTable1.GetValue("Title");
+        //        //    doc.Sketch = propertyTable1.GetValue("Sketch") == "Y";
+        //        //    doc.ShowLegend = propertyTable1.GetValue("ShowLegend") == "Y";
+        //        //    doc.TopDown = propertyTable1.GetValue("TopDown") == "Y";
+        //        //}
 
-                Item item = (previousNode.Tag as Item);
+        //        //Item item = (previousNode.Tag as Item);
 
-                if (item != null)
-                {
-                    switch (item.Command)
-                    {
-                        case "Boundary":
-                            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
-                            item.SetValue(1, propertyTable1.GetValue("Label"));
-                            item.SetValue(2, propertyTable1.GetValue("Type"));
-                            break;
-                        case "System_Boundary":
-                        case "Enterprise_Boundary":
-                        case "Container_Boundary":
-                            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
-                            item.SetValue(1, propertyTable1.GetValue("Label"));
-                            break;
-                        case "Relationship":
-                        case "Interact":
-                        case "Interact2":
-                            item.SetValue(0, propertyTable1.GetValue("From"), false);
-                            item.SetValue(1, propertyTable1.GetValue("To"), false);
-                            item.SetValue(2, propertyTable1.GetValue("Label"));
-                            item.SetValue(3, propertyTable1.GetValue("Technology"));
-                            break;
-                        case "Person":
-                        case "Person_Ext":
-                        case "System":
-                        case "System_Ext":
-                        case "SystemDb":
-                        case "SystemDb_Ext":
-                            item.IsExternal = propertyTable1.GetValue("IsExternal") == "Y";
-                            item.IsDatabase = propertyTable1.GetValue("IsDatabase") == "Y";
-                            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
-                            item.SetValue(1, propertyTable1.GetValue("Label"));
-                            item.SetValue(2, propertyTable1.GetValue("Description"));
-                            break;
-                        case "Container":
-                        case "Container_Ext":
-                        case "ContainerDb":
-                        case "ContainerDb_Ext":
-                        case "Component":
-                        case "ComponentDb":
-                            item.IsExternal = propertyTable1.GetValue("IsExternal") == "Y";
-                            item.IsDatabase = propertyTable1.GetValue("IsDatabase") == "Y";
-                            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
-                            item.SetValue(1, propertyTable1.GetValue("Label"));
-                            item.SetValue(2, propertyTable1.GetValue("Technology"));
-                            item.SetValue(3, propertyTable1.GetValue("Description"));
-                            break;
-                        case "Node":
-                            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
-                            item.SetValue(1, propertyTable1.GetValue("Label"));
-                            item.SetValue(2, propertyTable1.GetValue("Technology"));
-                            break;
-                        case "Rel":
-                            item.SetValue(0, propertyTable1.GetValue("From"), false);
-                            item.SetValue(1, propertyTable1.GetValue("To"), false);
-                            item.SetValue(2, propertyTable1.GetValue("Label"));
-                            item.SetValue(3, propertyTable1.GetValue("Technology"));
-                            break;
-                        default:
-                            MessageBox.Show($"{item.Command} is not handled");
-                            break;
-                    }
-                    switch (item.Command)
-                    {
-                        case "Rel":
-                            previousNode.Text = $"{item.Parameters[0]} --> {item.Parameters[1]}";
-                            break;
-                        default:
-                            previousNode.Text = item.GetValue(1);
-                            break;
-                    }
-                }
-            }
-        }
+        //        //if (item != null)
+        //        //{
+        //        //    switch (item.Command)
+        //        //    {
+        //        //        case "Boundary":
+        //        //            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
+        //        //            item.SetValue(1, propertyTable1.GetValue("Label"));
+        //        //            item.SetValue(2, propertyTable1.GetValue("Type"));
+        //        //            break;
+        //        //        case "System_Boundary":
+        //        //        case "Enterprise_Boundary":
+        //        //        case "Container_Boundary":
+        //        //            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
+        //        //            item.SetValue(1, propertyTable1.GetValue("Label"));
+        //        //            break;
+        //        //        case "Relationship":
+        //        //        case "Interact":
+        //        //        case "Interact2":
+        //        //            item.SetValue(0, propertyTable1.GetValue("From"), false);
+        //        //            item.SetValue(1, propertyTable1.GetValue("To"), false);
+        //        //            item.SetValue(2, propertyTable1.GetValue("Label"));
+        //        //            item.SetValue(3, propertyTable1.GetValue("Technology"));
+        //        //            break;
+        //        //        case "Person":
+        //        //        case "Person_Ext":
+        //        //        case "System":
+        //        //        case "System_Ext":
+        //        //        case "SystemDb":
+        //        //        case "SystemDb_Ext":
+        //        //            item.IsExternal = propertyTable1.GetValue("IsExternal") == "Y";
+        //        //            item.IsDatabase = propertyTable1.GetValue("IsDatabase") == "Y";
+        //        //            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
+        //        //            item.SetValue(1, propertyTable1.GetValue("Label"));
+        //        //            item.SetValue(2, propertyTable1.GetValue("Description"));
+        //        //            break;
+        //        //        case "Container":
+        //        //        case "Container_Ext":
+        //        //        case "ContainerDb":
+        //        //        case "ContainerDb_Ext":
+        //        //        case "Component":
+        //        //        case "ComponentDb":
+        //        //            item.IsExternal = propertyTable1.GetValue("IsExternal") == "Y";
+        //        //            item.IsDatabase = propertyTable1.GetValue("IsDatabase") == "Y";
+        //        //            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
+        //        //            item.SetValue(1, propertyTable1.GetValue("Label"));
+        //        //            item.SetValue(2, propertyTable1.GetValue("Technology"));
+        //        //            item.SetValue(3, propertyTable1.GetValue("Description"));
+        //        //            break;
+        //        //        case "Node":
+        //        //            item.SetValue(0, propertyTable1.GetValue("Alias"), false);
+        //        //            item.SetValue(1, propertyTable1.GetValue("Label"));
+        //        //            item.SetValue(2, propertyTable1.GetValue("Technology"));
+        //        //            break;
+        //        //        case "Rel":
+        //        //            item.SetValue(0, propertyTable1.GetValue("From"), false);
+        //        //            item.SetValue(1, propertyTable1.GetValue("To"), false);
+        //        //            item.SetValue(2, propertyTable1.GetValue("Label"));
+        //        //            item.SetValue(3, propertyTable1.GetValue("Technology"));
+        //        //            break;
+        //        //        default:
+        //        //            MessageBox.Show($"{item.Command} is not handled");
+        //        //            break;
+        //        //    }
+        //        //    switch (item.Command)
+        //        //    {
+        //        //        case "Rel":
+        //        //            previousNode.Text = $"{item.Parameters[0]} --> {item.Parameters[1]}";
+        //        //            break;
+        //        //        default:
+        //        //            previousNode.Text = item.GetValue(1);
+        //        //            break;
+        //        //    }
+        //        //}
+        //    }
+        //}
 
         private void EnableCCP(TreeNode node)
         {
@@ -834,12 +921,14 @@ namespace C4Editor
                 cutToolStripButton.Enabled = false;
                 copyToolStripButton.Enabled = false;
                 pasteToolStripButton.Enabled = false;
+                propertiesButton.Enabled = true;
 
                 GetMenuItem("contextMenuAdd").Enabled = false;
 
                 GetMenuItem("contextMenuCut").Enabled = false;
                 GetMenuItem("contextMenuCopy").Enabled = false;
                 GetMenuItem("contextMenuPaste").Enabled = false;
+                GetMenuItem("contextMenuProperties").Enabled = true;
             }
             else if (IsNodeInCorrectSection(treeView1.SelectedNode, treeView1.Nodes[1]))
             {
@@ -850,17 +939,21 @@ namespace C4Editor
                 {
                     cutToolStripButton.Enabled = false;
                     copyToolStripButton.Enabled = false;
+                    propertiesButton.Enabled = false;
                     GetMenuItem("contextMenuCut").Enabled = false;
                     GetMenuItem("contextMenuCopy").Enabled = false;
+                    GetMenuItem("contextMenuProperties").Enabled = false;
                 }
                 else
                 {
                     cutToolStripButton.Enabled = true;
                     copyToolStripButton.Enabled = true;
+                    propertiesButton.Enabled = true;
                     GetMenuItem("contextMenuCut").Enabled = true;
                     GetMenuItem("contextMenuCopy").Enabled = true;
+                    GetMenuItem("contextMenuProperties").Enabled = true;
                 }
-                pasteToolStripButton.Enabled = ((clipboardNode!= null) && ((clipboardNode.Tag as Item).Command != "Rel"));
+                pasteToolStripButton.Enabled = ((clipboardNode != null) && ((clipboardNode.Tag as Item).Command != "Rel"));
                 GetMenuItem("contextMenuPaste").Enabled = ((clipboardNode != null) && ((clipboardNode.Tag as Item).Command != "Rel"));
             }
             else if (IsNodeInCorrectSection(treeView1.SelectedNode, treeView1.Nodes[2]))
@@ -872,8 +965,10 @@ namespace C4Editor
 
                     cutToolStripButton.Enabled = false;
                     copyToolStripButton.Enabled = false;
-                    GetMenuItem("contextMenuCut").Enabled = true;
-                    GetMenuItem("contextMenuCopy").Enabled = true;
+                    propertiesButton.Enabled = false;
+                    GetMenuItem("contextMenuCut").Enabled = false;
+                    GetMenuItem("contextMenuCopy").Enabled = false;
+                    GetMenuItem("contextMenuProperties").Enabled = false;
                 }
                 else
                 {
@@ -882,8 +977,10 @@ namespace C4Editor
 
                     cutToolStripButton.Enabled = true;
                     copyToolStripButton.Enabled = true;
+                    propertiesButton.Enabled = true;
                     GetMenuItem("contextMenuCut").Enabled = true;
                     GetMenuItem("contextMenuCopy").Enabled = true;
+                    GetMenuItem("contextMenuProperties").Enabled = true;
                 }
                 pasteToolStripButton.Enabled = ((clipboardNode != null) && ((clipboardNode.Tag as Item).Command == "Rel"));
             }
@@ -961,108 +1058,111 @@ namespace C4Editor
             FillAddMenus(AddDropDownButton);
             FillAddMenus(GetMenuItem("contextMenuAdd"));
 
-            Document doc = (e.Node.Tag as Document);
-            if (doc != null)
-            {
-                // make this more descriptive later
-                SetProperties("Document");
-                propertyTable1.SetText("Document");
+            ////Document doc = (e.Node.Tag as Document);
+            ////if (doc != null)
+            ////{
+            ////    PropertyEditor.PropertyForm pf = new PropertyEditor.PropertyForm();
+            ////    pf.ShowDialog(doc);
 
-                propertyTable1.SetValue("DocumentName", doc.DocumentName);
-                propertyTable1.SetValue("DocumentType", doc.DocumentType);
-                propertyTable1.SetValue("Title", doc.Title);
-                propertyTable1.SetValue("Sketch", doc.Sketch ? "Y" : "N");
-                propertyTable1.SetValue("ShowLegend", doc.ShowLegend ? "Y" : "N");
-                propertyTable1.SetValue("TopDown", doc.TopDown ? "Y" : "N");
-            }
+            ////    //// make this more descriptive later
+            ////    //SetProperties("Document");
+            ////    //propertyTable1.SetText("Document");
 
-            Item item = (e.Node.Tag as Item);
+            ////    //propertyTable1.SetValue("DocumentName", doc.DocumentName);
+            ////    //propertyTable1.SetValue("DocumentType", doc.DocumentType);
+            ////    //propertyTable1.SetValue("Title", doc.Title);
+            ////    //propertyTable1.SetValue("Sketch", doc.Sketch ? "Y" : "N");
+            ////    //propertyTable1.SetValue("ShowLegend", doc.ShowLegend ? "Y" : "N");
+            ////    //propertyTable1.SetValue("TopDown", doc.TopDown ? "Y" : "N");
+            ////}
 
-            if (item != null)
-            {
-                switch (item.Command)
-                {
-                    case "Boundary":
-                        SetProperties("ALType");
-                        propertyTable1.SetValue("Alias", item.GetValue(0));
-                        propertyTable1.SetValue("Label", item.GetValue(1));
-                        propertyTable1.SetValue("Type", item.GetValue(2));
-                        break;
-                    case "System_Boundary":
-                    case "Enterprise_Boundary":
-                    case "Container_Boundary":
-                        SetProperties("AL");
-                        propertyTable1.SetValue("Alias", item.GetValue(0));
-                        propertyTable1.SetValue("Label", item.GetValue(1));
-                        break;
-                    case "Relationship":
-                    case "Interact":
-                    case "Interact2":
-                        SetProperties("FTLTech");
-                        propertyTable1.SetValue("From", item.GetValue(0));
-                        propertyTable1.SetValue("To", item.GetValue(1));
-                        propertyTable1.SetValue("Label", item.GetValue(2));
-                        propertyTable1.SetValue("Technology", item.GetValue(3));
-                        break;
-                    case "Person":
-                    //case "Person_Ext":
-                        SetProperties("ALD", includeExternal: true);
-                        propertyTable1.SetValue("IsExternal", item.IsExternal ? "Y" : "N");
-                        propertyTable1.SetValue("Alias", item.GetValue(0));
-                        propertyTable1.SetValue("Label", item.GetValue(1));
-                        propertyTable1.SetValue("Description", item.GetValue(2));
-                        break;
-                    case "System":
-                    //case "System_Ext":
-                    //case "SystemDb":
-                    //case "SystemDb_Ext":
-                        SetProperties("ALD", includeExternal: true, includeDatabase: true);
-                        propertyTable1.SetValue("IsExternal", item.IsExternal ? "Y" : "N");
-                        propertyTable1.SetValue("IsDatabase", item.IsDatabase ? "Y" : "N");
-                        propertyTable1.SetValue("Alias", item.GetValue(0));
-                        propertyTable1.SetValue("Label", item.GetValue(1));
-                        propertyTable1.SetValue("Description", item.GetValue(2));
-                        break;
-                    case "Container":
-                    //case "Container_Ext":
-                    //case "ContainerDb":
-                    //case "ContainerDb_Ext":
-                        SetProperties("ALTechD", includeExternal: true, includeDatabase: true);
-                        propertyTable1.SetValue("IsExternal", item.IsExternal ? "Y" : "N");
-                        propertyTable1.SetValue("IsDatabase", item.IsDatabase ? "Y" : "N");
-                        propertyTable1.SetValue("Alias", item.GetValue(0));
-                        propertyTable1.SetValue("Label", item.GetValue(1));
-                        propertyTable1.SetValue("Technology", item.GetValue(2));
-                        propertyTable1.SetValue("Description", item.GetValue(3));
-                        break;
-                    case "Component":
-                    //case "ComponentDb":
-                        SetProperties("ALTechD", includeDatabase: true);
-                        propertyTable1.SetValue("IsDatabase", item.IsDatabase ? "Y" : "N");
-                        propertyTable1.SetValue("Alias", item.GetValue(0));
-                        propertyTable1.SetValue("Label", item.GetValue(1));
-                        propertyTable1.SetValue("Technology", item.GetValue(2));
-                        propertyTable1.SetValue("Description", item.GetValue(3));
-                        break;
-                    case "Node":
-                        SetProperties("ALTech");
-                        propertyTable1.SetValue("Alias", item.GetValue(0));
-                        propertyTable1.SetValue("Label", item.GetValue(1));
-                        propertyTable1.SetValue("Technology", item.GetValue(2));
-                        break;
-                    case "Rel":
-                        SetProperties("FTLTech");
-                        propertyTable1.SetValue("From", item.GetValue(0));
-                        propertyTable1.SetValue("To", item.GetValue(1));
-                        propertyTable1.SetValue("Label", item.GetValue(2));
-                        propertyTable1.SetValue("Technology", item.GetValue(3));
-                        break;
-                    default:
-                        MessageBox.Show($"{item.Command} is not handled");
-                        break;
-                }
-                propertyTable1.SetText(DisplayNames.GetDisplayName(item.Command));
-            }
+            //Item item = (e.Node.Tag as Item);
+
+            //if (item != null)
+            //{
+            //    switch (item.Command)
+            //    {
+            ////        case "Boundary":
+            ////            SetProperties("ALType");
+            ////            propertyTable1.SetValue("Alias", item.GetValue(0));
+            ////            propertyTable1.SetValue("Label", item.GetValue(1));
+            ////            propertyTable1.SetValue("Type", item.GetValue(2));
+            ////            break;
+            ////        case "System_Boundary":
+            ////        case "Enterprise_Boundary":
+            ////        case "Container_Boundary":
+            ////            SetProperties("AL");
+            ////            propertyTable1.SetValue("Alias", item.GetValue(0));
+            ////            propertyTable1.SetValue("Label", item.GetValue(1));
+            ////            break;
+            ////        case "Relationship":
+            ////        case "Interact":
+            ////        case "Interact2":
+            ////            SetProperties("FTLTech");
+            ////            propertyTable1.SetValue("From", item.GetValue(0));
+            ////            propertyTable1.SetValue("To", item.GetValue(1));
+            ////            propertyTable1.SetValue("Label", item.GetValue(2));
+            ////            propertyTable1.SetValue("Technology", item.GetValue(3));
+            ////            break;
+            ////        case "Person":
+            ////        //case "Person_Ext":
+            ////            SetProperties("ALD", includeExternal: true);
+            ////            propertyTable1.SetValue("IsExternal", item.IsExternal ? "Y" : "N");
+            ////            propertyTable1.SetValue("Alias", item.GetValue(0));
+            ////            propertyTable1.SetValue("Label", item.GetValue(1));
+            ////            propertyTable1.SetValue("Description", item.GetValue(2));
+            ////            break;
+            ////        case "System":
+            ////        //case "System_Ext":
+            ////        //case "SystemDb":
+            ////        //case "SystemDb_Ext":
+            ////            SetProperties("ALD", includeExternal: true, includeDatabase: true);
+            ////            propertyTable1.SetValue("IsExternal", item.IsExternal ? "Y" : "N");
+            ////            propertyTable1.SetValue("IsDatabase", item.IsDatabase ? "Y" : "N");
+            ////            propertyTable1.SetValue("Alias", item.GetValue(0));
+            ////            propertyTable1.SetValue("Label", item.GetValue(1));
+            ////            propertyTable1.SetValue("Description", item.GetValue(2));
+            ////            break;
+            ////        case "Container":
+            ////        //case "Container_Ext":
+            ////        //case "ContainerDb":
+            ////        //case "ContainerDb_Ext":
+            ////            SetProperties("ALTechD", includeExternal: true, includeDatabase: true);
+            ////            propertyTable1.SetValue("IsExternal", item.IsExternal ? "Y" : "N");
+            ////            propertyTable1.SetValue("IsDatabase", item.IsDatabase ? "Y" : "N");
+            ////            propertyTable1.SetValue("Alias", item.GetValue(0));
+            ////            propertyTable1.SetValue("Label", item.GetValue(1));
+            ////            propertyTable1.SetValue("Technology", item.GetValue(2));
+            ////            propertyTable1.SetValue("Description", item.GetValue(3));
+            ////            break;
+            //        case "Component":
+            //        //case "ComponentDb":
+            //            SetProperties("ALTechD", includeDatabase: true);
+            //            propertyTable1.SetValue("IsDatabase", item.IsDatabase ? "Y" : "N");
+            //            propertyTable1.SetValue("Alias", item.GetValue(0));
+            //            propertyTable1.SetValue("Label", item.GetValue(1));
+            //            propertyTable1.SetValue("Technology", item.GetValue(2));
+            //            propertyTable1.SetValue("Description", item.GetValue(3));
+            //            break;
+            ////        case "Node":
+            ////            SetProperties("ALTech");
+            ////            propertyTable1.SetValue("Alias", item.GetValue(0));
+            ////            propertyTable1.SetValue("Label", item.GetValue(1));
+            ////            propertyTable1.SetValue("Technology", item.GetValue(2));
+            ////            break;
+            //        case "Rel":
+            //            SetProperties("FTLTech");
+            //            propertyTable1.SetValue("From", item.GetValue(0));
+            //            propertyTable1.SetValue("To", item.GetValue(1));
+            //            propertyTable1.SetValue("Label", item.GetValue(2));
+            //            propertyTable1.SetValue("Technology", item.GetValue(3));
+            //            break;
+            //        default:
+            //            MessageBox.Show($"{item.Command} is not handled");
+            //            break;
+            //    }
+            //    propertyTable1.SetText(DisplayNames.GetDisplayName(item.Command));
+            //}
 
             previousNode = e.Node;
         }

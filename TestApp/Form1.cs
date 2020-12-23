@@ -17,5 +17,16 @@ namespace TestApp
             InitializeComponent();
         }
 
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            c4EditorControl1.LoadFile(@"c:\autoany\context.puml");
+            //c4EditorControl1.LoadFile(@"c:\autoany\component.puml");
+            //c4EditorControl1.LoadFile(@"c:\autoany\container.puml");
+            //c4EditorControl1.LoadFile(@"c:\autoany\deployment.puml");
+
+            // dynamic will be for a future release
+            //c4EditorControl1.LoadFile(@"c:\autoany\dynamic.puml");
+        }
     }
 }

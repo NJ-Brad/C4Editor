@@ -34,9 +34,10 @@ namespace TestApp
             // 
             // c4EditorControl1
             // 
-            this.c4EditorControl1.Location = new System.Drawing.Point(51, 39);
+            this.c4EditorControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.c4EditorControl1.Location = new System.Drawing.Point(0, 0);
             this.c4EditorControl1.Name = "c4EditorControl1";
-            this.c4EditorControl1.Size = new System.Drawing.Size(1396, 450);
+            this.c4EditorControl1.Size = new System.Drawing.Size(800, 450);
             this.c4EditorControl1.TabIndex = 0;
             // 
             // Form1

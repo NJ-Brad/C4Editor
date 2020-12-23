@@ -48,6 +48,7 @@ namespace C4Editor
                         }
                         break;
                     case '\r':
+                    case '\n':
                         NewLine(ref items, level, ref sb);
                         break;
                     default:
@@ -117,7 +118,8 @@ namespace C4Editor
 
                 if ((!string.IsNullOrEmpty(item.Command)) && (item.Parameters.Count > 0))
                 {
-                    if (item.Command.ToUpper().StartsWith("REL"))
+                    if ((item.Command.ToUpper().StartsWith("REL")) ||
+                        (item.Command.ToUpper().StartsWith("INTERACT")))
                     {
                         rtnVal.Relations.Add(item);
                     }

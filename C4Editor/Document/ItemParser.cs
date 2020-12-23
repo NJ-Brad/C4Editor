@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using C4Editor.C4Types;
 
 namespace C4Editor
 {
@@ -102,6 +103,18 @@ namespace C4Editor
                                         rtnVal.IsDatabase = true;
                                         rtnVal.Command = "Component";
                                         break;
+                                    case "Boundary":
+                                        rtnVal.Command = "Boundary";
+                                        break;
+                                    case "System_Boundary":
+                                        rtnVal.Command = "System_Boundary";
+                                        break;
+                                    case "Enterprise_Boundary":
+                                        rtnVal.Command = "Enterprise_Boundary";
+                                        break;
+                                    case "Container_Boundary":
+                                        rtnVal.Command = "Container_Boundary";
+                                        break;
                                     default:
                                         rtnVal.Command = initialCommand;
                                         break;
@@ -142,6 +155,59 @@ namespace C4Editor
                 Parameter(ref rtnVal);
             }
 
+            rtnVal = ConvertToType(rtnVal);
+
+            return rtnVal;
+        }
+
+        public static Item ConvertToType(Item original)
+        {
+            Item rtnVal = original;
+
+            switch (original.Command)
+            {
+                case "Person":
+                case "Person_Ext":
+                    rtnVal = new C4Person(original);
+                    break;
+                case "System":
+                case "System_Ext":
+                case "SystemDb":
+                case "SystemDb_Ext":
+                    rtnVal = new C4System(original);
+                    break;
+                case "Container":
+                case "ContainerDb":
+                case "Container_Ext":
+                case "ContainerDb_Ext":
+                    rtnVal = new C4Container(original);
+                    break;
+                case "Node":
+                    rtnVal = new C4Node(original);
+                    break;
+                case "Boundary":
+                    rtnVal = new C4Boundary(original);
+                    break;
+                case "Enterprise_Boundary":
+                    rtnVal = new C4EnterpriseBoundary(original);
+                    break;
+                case "System_Boundary":
+                    rtnVal = new C4SystemBoundary(original);
+                    break;
+                case "Container_Boundary":
+                    rtnVal = new C4ContainerBoundary(original);
+                    break;
+                case "Rel":
+                    rtnVal = new C4Relation(original);
+                    break;
+                case "Component":
+                case "ComponentDb":
+                    rtnVal = new C4Component(original);
+                    break;
+                default:
+                    System.Diagnostics.Debug.WriteLine(original.Command);
+                    break;
+            }
             return rtnVal;
         }
 
