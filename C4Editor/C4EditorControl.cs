@@ -114,7 +114,7 @@ namespace C4Editor
 
         string fileName = "";
 
-        private void SaveDocument()
+        public void SaveDocument()
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "PUML files (*.puml)|*.puml|All Files (*.*)|*.*";

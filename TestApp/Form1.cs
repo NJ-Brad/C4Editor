@@ -17,16 +17,54 @@ namespace TestApp
             InitializeComponent();
         }
 
-        protected override void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-            c4EditorControl1.LoadFile(@"c:\autoany\context.puml");
-            //c4EditorControl1.LoadFile(@"c:\autoany\component.puml");
-            //c4EditorControl1.LoadFile(@"c:\autoany\container.puml");
-            //c4EditorControl1.LoadFile(@"c:\autoany\deployment.puml");
+        string fileName = "";
 
-            // dynamic will be for a future release
-            //c4EditorControl1.LoadFile(@"c:\autoany\dynamic.puml");
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Plant-UML file (*.puml)|*.puml|All Files (*.*)|*.*";
+            ofd.CheckFileExists = true;
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                fileName = ofd.FileName;
+                c4EditorControl1.LoadFile(ofd.FileName);
+            }
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            //if (string.IsNullOrEmpty(fileName))
+            //{
+            //    SaveAs();
+            //}
+            //else
+            //{
+                Save();
+            //}
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            SaveAs();
+        }
+
+        private void SaveAs()
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Markdown Files (*.md)|*.md|All Files (*.*)|*.*";
+            sfd.OverwritePrompt = true;
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                fileName = sfd.FileName;
+                Save();
+                //File.WriteAllText(fileName, richTextBox1.Text);
+            }
+        }
+
+        private void Save()
+        {
+            c4EditorControl1.SaveDocument();
+            //File.WriteAllText(fileName, richTextBox1.Text);
         }
     }
 }
