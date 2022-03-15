@@ -15,7 +15,7 @@ namespace C4Editor
 
             sb.AppendLine($"@startuml {doc.DocumentName}");
 
-            sb.AppendLine($"!include https://raw.githubusercontent.com/NJ-Brad/C4-PlantUML/master/C4_{doc.DocumentType}.puml");
+            sb.AppendLine($"!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_{doc.DocumentType}.puml");
             if (!string.IsNullOrEmpty(doc.Title))
             {
                 sb.AppendLine($"title {doc.Title}");
