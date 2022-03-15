@@ -15,7 +15,20 @@ Internally, this application converts the JSON file into a Plant-UML script that
 This is the editor
 ![./editor.png](editor.png "editor.png")
 
+In order to add a module or edit properties of existing modules, right click on the tree on the left
+![./ContextMenu.png](ContextMenu.png "ContextMenu.png")
+
+Below is a sample of a property sheet
+![./PropertyEditor.png](PropertyEditor.png "PropertyEditor.png")
+
+By selecting the "Source" tab, you can see the Plant-UML source code
+![./PlantUmlText.png](PlantUmlText.png "PlantUmlText.png")
+
+
 # How to build it
 Download the source
+
 Open Visual Studio 2022 - The project compiles using .Net 6
+
 Execute the application
+
