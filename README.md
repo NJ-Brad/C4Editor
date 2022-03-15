@@ -8,6 +8,8 @@ There are implementations of creating these diagrams using many different progra
 
 I had a need on a project for a more viaual approach to creating these diagrams.  This project is the result.
 
+It is written as a Windows Forms application, utilizing .Net 6.
+
 It reads and writes JSON files, which can be stored in version control.  
 
 Internally, this application converts the JSON file into a Plant-UML script that is shown on the right hand panel.
@@ -24,6 +26,10 @@ Below is a sample of a property sheet
 By selecting the "Source" tab, you can see the Plant-UML source code
 ![./PlantUmlText.png](PlantUmlText.png "PlantUmlText.png")
 
+
+# Environment Requirements
+Windows computer
+Visual Studio 2022
 
 # How to build it
 Download the source
