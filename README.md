@@ -6,7 +6,7 @@ The C4 method of describing architecture as code was originally presented by Sim
 
 There are implementations of creating these diagrams using many different programming languages.
 
-I had a need on a project for a more viaual approach to creating these diagrams.  This project is the result.
+I had a need on a project for a more visual approach to creating these diagrams.  This project is the result.
 
 It is written as a Windows Forms application, utilizing .Net 6.
 
