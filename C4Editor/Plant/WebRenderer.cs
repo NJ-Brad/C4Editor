@@ -9,7 +9,7 @@ namespace C4Editor
     {
         public async Task<byte[]> RenderAsync(string code)
         {
-            string renderUrl = $"http://plantuml.com/plantuml/png/{code}";
+            string renderUrl = $"http://www.plantuml.com/plantuml/png/{code}";
 
             using (HttpClient httpClient = new HttpClient())
             {

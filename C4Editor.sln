@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30615.102
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "C4Editor", "C4Editor\C4Editor.csproj", "{1726D003-BADF-4D09-A06E-2708AA34CAB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{0AFF51FA-585E-49B3-8D1E-4F2C0671AC45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{0AFF51FA-585E-49B3-8D1E-4F2C0671AC45}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PropertyEditor", "PropertyEditor\PropertyEditor.csproj", "{D7FFCB56-1118-4C52-A0BF-FCC9E8D9DCC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0AFF51FA-585E-49B3-8D1E-4F2C0671AC45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AFF51FA-585E-49B3-8D1E-4F2C0671AC45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AFF51FA-585E-49B3-8D1E-4F2C0671AC45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7FFCB56-1118-4C52-A0BF-FCC9E8D9DCC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7FFCB56-1118-4C52-A0BF-FCC9E8D9DCC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7FFCB56-1118-4C52-A0BF-FCC9E8D9DCC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7FFCB56-1118-4C52-A0BF-FCC9E8D9DCC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
