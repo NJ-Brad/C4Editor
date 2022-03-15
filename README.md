@@ -12,7 +12,7 @@ It is written as a Windows Forms application, utilizing .Net 6.
 
 It reads and writes JSON files, which can be stored in version control.  
 
-Internally, this application converts the JSON file into a Plant-UML script that is shown on the right hand panel.
+Internally, this application converts the JSON file into a Plant-UML script that is shown on the right hand panel.  The visualization is provided by the Plant-UML web server.
 
 This is the editor
 ![./editor.png](editor.png "editor.png")
@@ -29,6 +29,7 @@ By selecting the "Source" tab, you can see the Plant-UML source code
 
 # Environment Requirements
 Windows computer
+
 Visual Studio 2022
 
 # How to build it
