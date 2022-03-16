@@ -10,9 +10,9 @@ I had a need on a project for a more visual approach to creating these diagrams.
 
 It is written as a Windows Forms application, utilizing .Net 6.
 
-It reads and writes JSON files, which can be stored in version control.  
+It reads and writes Plant-UML (.puml) files, which can be stored in version control.  
 
-Internally, this application converts the JSON file into a Plant-UML script that is shown on the right hand panel.  The visualization is provided by the Plant-UML web server.
+Internally, this application parses the .puml file and displays the components on the tree on the left and as text on the right hand panel.  The visualization is provided by the Plant-UML web server.
 
 This is the editor
 ![./editor.png](editor.png "editor.png")
