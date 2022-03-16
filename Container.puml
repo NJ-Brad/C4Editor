@@ -1,5 +1,5 @@
 @startuml 
-!include https://raw.githubusercontent.com/NJ-Brad/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 title Container diagram for Internet Banking System
 LAYOUT_WITH_LEGEND()
 LAYOUT_TOP_DOWN()
