@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controls\ChangeDetails.cs" />
+    <Compile Remove="Controls\PropertyTable.cs" />
+    <Compile Remove="Controls\PropertyTable.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Controls\PropertyTable.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PropertyEditor\PropertyEditor.csproj" />
   </ItemGroup>
 

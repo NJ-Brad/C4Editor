@@ -1,4 +1,6 @@
 ﻿
+using PropertyEditor;
+
 namespace C4Editor
 {
     partial class Form1
@@ -49,7 +51,7 @@ namespace C4Editor
             this.helpToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeView1 = new System.Windows.Forms.TreeView();
-            this.propertyTable1 = new C4Editor.PropertyTable();
+            this.propertyTable1 = new PropertyEditor.PropertyTable();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
